@@ -27,10 +27,6 @@ def scan_models_from_hf():
                 speed = total_processed / elapsed
                 print(f"already processed {total_processed} records, speed: {int(speed)} records/sec")
                 
-            # 为了节省时间，你可以选择只扫描前 100万条，或者让它一直跑完
-            # if total_processed >= 1000000: 
-            #     print("达到 100万条上限，提前停止。")
-            #     break
                 
     except KeyboardInterrupt:
         print("\nThe scanning was interrupted by user.")
