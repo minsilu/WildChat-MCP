@@ -1,14 +1,32 @@
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 import duckdb
 import os
-
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_PATH = os.path.join(BASE_DIR, "wildchat.db")
-
+import sys
+# sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# from config import DB_FILE
+import tools
+import prompts
 
 mcp = FastMCP("wildchat")
 
+# meta analytics tools
+mcp.add_tool(tools.get_dataset_summary)
+mcp.add_tool(tools.get_db_schema)
+
+# macro analytics tools
+mcp.add_tool(tools.get_topic_stats)
+mcp.add_tool(tools.get_engagement_stats)
+mcp.add_tool(tools.get_temporal_trends)
+
+
+@mcp.prompt("analyze-wildchat")
+def analyze_wildchat(focus: str = "general") -> str:
+    """
+    Returns a system prompt to guide the LLM in analyzing the WildChat dataset.
+    Args:
+        focus: 'general', 'models', 'topics', or 'temporal'
+    """
+    return prompts.analyze_wildchat_prompt(focus)
 
 @mcp.tool()
 def get_total_count() -> str:
@@ -17,7 +35,7 @@ def get_total_count() -> str:
     Useful for checking if the database is connected.
     """
     try:
-        con = duckdb.connect(DB_PATH, read_only=True)
+        con = duckdb.connect(DB_FILE, read_only=True)
         count = con.execute("SELECT COUNT(*) FROM wildchat").fetchone()[0]
         con.close()
         return f"Database connected! Total conversations: {count}"
@@ -32,7 +50,7 @@ def get_sample_prompt(model_name: str) -> str:
         model_name: e.g., 'gpt-4', 'gpt-3.5-turbo'
     """
     try:
-        con = duckdb.connect(DB_PATH, read_only=True)
+        con = duckdb.connect(DB_FILE, read_only=True)
 
         result = con.execute("""
             SELECT user_prompt, timestamp 

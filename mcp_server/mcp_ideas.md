@@ -6,35 +6,21 @@ The MCP server will transform static notebook analysis into an interactive conve
 
 
 ## 数据清洗
-保留哪些数据？
-英语，
-不同的model编号怎么处理？
+
 是否要构建vector index?来支持相似度搜索
-元数据？
-模型发布时间？
-In-memory indexes for fast querying:
-Topic classification index (pre-computed or on-demand)
-Temporal index (by timestamp)
-Model-specific indexes
+
+
 
 Conversation length buckets
 
-Caching strategy: Pre-compute expensive operations (topic modeling, embeddings) and store results
-
-
-Implementation Considerations
 Pre-compute topic classifications (using LDA, BERTopic, or LLM-based classification)
-Build inverted indexes for fast filtering
-Cache frequent query results
 Use sampling for very large result sets with extrapolation
 
 Load data in chunks, not all at once
-Use database (SQLite/DuckDB) instead of pure in-memory for 3.2M conversations
 Lazy loading of conversation content (load summaries first, full text on demand)
 
 Plugin architecture for new analysis methods
-Easy to add new topic categories or classification schemes
-Support for custom user-defined metrics
+
 
 ## Resources 设计 (Data 层)
 Resources 是被动的数据源，用于提供“上下文”。
