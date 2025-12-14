@@ -27,6 +27,7 @@ mcp.add_tool(tools.detect_conversation_anomalies)
 
 # micro retrieval tool
 mcp.add_tool(tools.get_conversation_content)
+mcp.add_tool(tools.run_sql_query)
 
 @mcp.prompt("analyze-wildchat")
 def analyze_wildchat(focus: str = "general") -> str:

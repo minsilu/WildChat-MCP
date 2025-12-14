@@ -695,6 +695,47 @@ def get_conversation_content(conversation_id: str) -> str:
     finally:
         con.close()
         
+def run_sql_query(query: str) -> str:
+    """
+    Executes a raw SQL query against the WildChat database.
+    
+    Use this tool ONLY when other specialized tools (get_topic_stats, etc.) 
+    cannot answer the specific analytical question.
+    
+    Constraints:
+    - Connection is READ-ONLY.
+    - Max rows returned: 20 (to save context window).
+    - Max execution time: 5 seconds.
+    
+    Args:
+        query: Valid DuckDB SQL string. 
+               Example: "SELECT substring(search_text, 1, 50) FROM wildchat WHERE turn_count > 100 LIMIT 5"
+    
+    Returns:
+        JSON string of the query result.
+    """
+    con = duckdb.connect(DB_PATH, read_only=True)
+    
+    try:
+        forbidden_keywords = ["DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "TRUNCATE"]
+        if any(k in query.upper() for k in forbidden_keywords):
+            return "Error: Write operations are strictly forbidden."
+
+        df = con.execute(query).fetchdf()
+        
+        if len(df) > 20:
+            df = df.head(20)
+            warning = f"\n(Note: Result truncated. Showing top 20 of {len(df)} rows. Use LIMIT in SQL to refine.)"
+        else:
+            warning = ""
+            
+        return df.to_json(orient='records', date_format='iso') + warning
+
+    except Exception as e:
+
+        return f"SQL Execution Error: {str(e)}"
+    finally:
+        con.close()        
 
         
         
