@@ -714,7 +714,7 @@ def run_sql_query(query: str) -> str:
     Returns:
         JSON string of the query result.
     """
-    con = duckdb.connect(DB_PATH, read_only=True)
+    con = duckdb.connect(DB_FILE, read_only=True)
     
     try:
         forbidden_keywords = ["DROP", "DELETE", "INSERT", "UPDATE", "ALTER", "TRUNCATE"]

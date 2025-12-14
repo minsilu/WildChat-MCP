@@ -2,10 +2,10 @@ import duckdb
 import pandas as pd
 import torch
 import numpy as np
-from bertopic import BERTopic
 from sentence_transformers import SentenceTransformer
 from sklearn.decomposition import PCA
 from sklearn.cluster import MiniBatchKMeans
+from sklearn.feature_extraction.text import CountVectorizer
 
 import time
 
@@ -14,7 +14,7 @@ DB_FILE = "/private/m248lu/wildchat.db"
 BATCH_SIZE = 512         # GPU 
 N_CLUSTERS = 50             
 DIMENSIONS = 5              
-CPU_CORES = -1            # USE ALL CORES
+
 # ==========================================
 
 def run_quality_pipeline():
@@ -157,6 +157,11 @@ def run_fast_pipeline():
     reduced_embeddings = dim_model.fit_transform(embeddings)
     print(f"   PCA Finished in {time.time()-t0:.1f} seconds. Shape: {reduced_embeddings.shape}")
 
+    del embeddings 
+    import gc
+    gc.collect()
+    print("   PCA done. Freed original embeddings memory.")
+    
     print(f"\n[Step 4/5] Clustering (MiniBatchKMeans)...")
     t0 = time.time()
     cluster_model = MiniBatchKMeans(
@@ -167,40 +172,27 @@ def run_fast_pipeline():
         verbose=1 
     )
 
-    clusters = cluster_model.fit_predict(reduced_embeddings)
-    print(f"   ✅ Clustering Finished in {time.time()-t0:.1f} seconds.")
+    labels = cluster_model.fit_predict(reduced_embeddings)
+    print(f"   Clustering Finished in {time.time()-t0:.1f} seconds.")
 
     # 5. Assembly BERTopic
     print(f"\n[Step 5/5] Extracting Topic Keywords...")
-    topic_model = BERTopic(
-        embedding_model=embedding_model, 
-        umap_model=dim_model,            
-        hdbscan_model=cluster_model,     
-        calculate_probabilities=False,
-        verbose=True
-    )
+    df['topic_id'] = labels
+    topic_docs = df.groupby('topic_id')['search_text'].apply(lambda x: " ".join(x.head(1000))).reset_index()
+    vectorizer = CountVectorizer(stop_words='english', max_features=1000)
+    X = vectorizer.fit_transform(topic_docs['search_text'])
+    feature_names = vectorizer.get_feature_names_out()
 
-
-    topic_model.fit(docs, embeddings) 
-    
-    print("\nPipeline Finished!")
-    print(topic_model.get_topic_info().head(20))
+    topic_mapping = {}
+    for i, row in enumerate(X.toarray()):
+        topic_id = topic_docs.iloc[i]['topic_id']
+        top_indices = row.argsort()[-3:][::-1]
+        keywords = [feature_names[ind] for ind in top_indices]
+        topic_mapping[topic_id] = "_".join(keywords).title() # e.g. "Python_Code_Error"
+        print(f"   Topic {topic_id}: {topic_mapping[topic_id]}")
 
     print("\nUpdating Database...")
-    topic_info = topic_model.get_topic_info()
-    
-    topic_mapping = {}
-    for topic_id in range(N_CLUSTERS):
-        try:
-            keywords = [w[0] for w in topic_model.get_topic(topic_id)[:3]]
-            label = "_".join(keywords)
-            topic_mapping[topic_id] = label
-        except:
-            topic_mapping[topic_id] = "General"
-
-    doc_topics = topic_model.topics_
-
-    final_labels = [topic_mapping.get(t, "General") for t in doc_topics]
+    final_labels = [topic_mapping.get(t, "General") for t in labels]
 
     update_df = pd.DataFrame({
         'id': ids,
@@ -215,9 +207,10 @@ def run_fast_pipeline():
         WHERE wildchat.id = topic_updates.id
     """)
     con.execute("DROP TABLE topic_updates")
-    print("✅ Database Updated Successfully.")
+    print("Database Updated Successfully.")
     print(f"Total Time: {(time.time()-start_global)/60:.1f} minutes.")
 
 
 if __name__ == "__main__":
-    run_quality_pipeline()
+    print("Running Topic Modeling Pipeline...")
+    run_fast_pipeline()
