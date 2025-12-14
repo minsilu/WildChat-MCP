@@ -6,6 +6,7 @@ import sys
 # from config import DB_FILE
 import tools
 import prompts
+import resources
 
 mcp = FastMCP("wildchat")
 
@@ -18,6 +19,14 @@ mcp.add_tool(tools.get_topic_stats)
 mcp.add_tool(tools.get_engagement_stats)
 mcp.add_tool(tools.get_temporal_trends)
 
+# discovery tools
+mcp.add_tool(tools.search_conversations)
+mcp.add_tool(tools.count_matches)
+mcp.add_tool(tools.analyze_user_behavior)
+mcp.add_tool(tools.detect_conversation_anomalies)
+
+# micro retrieval tool
+mcp.add_tool(tools.get_conversation_content)
 
 @mcp.prompt("analyze-wildchat")
 def analyze_wildchat(focus: str = "general") -> str:
@@ -28,46 +37,32 @@ def analyze_wildchat(focus: str = "general") -> str:
     """
     return prompts.analyze_wildchat_prompt(focus)
 
-@mcp.tool()
-def get_total_count() -> str:
+@mcp.prompt("audit-conversation")
+def audit_conversation(conversation_id: str) -> str:
     """
-    Check how many conversations are in the database.
-    Useful for checking if the database is connected.
+    Start a deep-dive audit on a specific conversation ID.
+    Use this when you have an ID and want to check for safety/quality issues.
     """
-    try:
-        con = duckdb.connect(DB_FILE, read_only=True)
-        count = con.execute("SELECT COUNT(*) FROM wildchat").fetchone()[0]
-        con.close()
-        return f"Database connected! Total conversations: {count}"
-    except Exception as e:
-        return f"Error connecting to DB: {str(e)}"
+    return prompts.audit_conversation_prompt(conversation_id)
 
-@mcp.tool()
-def get_sample_prompt(model_name: str) -> str:
-    """
-    Get one recent user prompt for a specific model.
-    Args:
-        model_name: e.g., 'gpt-4', 'gpt-3.5-turbo'
-    """
-    try:
-        con = duckdb.connect(DB_FILE, read_only=True)
+@mcp.resource("wildchat://info/schema")
+def resource_schema() -> str:
+    """The database schema definition."""
+    return resources.get_resource_content("wildchat://info/schema")
 
-        result = con.execute("""
-            SELECT user_prompt, timestamp 
-            FROM wildchat 
-            WHERE model = ? 
-            LIMIT 1
-        """, [model_name]).fetchone()
-        
-        con.close()
-        
-        if result:
-            return f"Found a prompt for {model_name} from {result[1]}:\n\n'{result[0]}'"
-        else:
-            return f"No prompts found for model: {model_name}"
-            
-    except Exception as e:
-        return f"Error: {str(e)}"
+@mcp.resource("wildchat://info/summary")
+def resource_summary() -> str:
+    """High-level dataset statistics (counts, top models, dates)."""
+    return resources.get_resource_content("wildchat://info/summary")
+
+@mcp.resource("wildchat://conversations/{id}")
+def conversation_resource(id: str) -> str:
+    """
+    Direct access to a full conversation log.
+    """
+    return resources.get_resource_content(f"wildchat://conversations/{id}")
+
+
 
 if __name__ == "__main__":
 

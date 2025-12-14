@@ -493,7 +493,162 @@ def count_matches(
     finally:
         con.close()
 
+def analyze_user_behavior(
+    behavior_type: Literal["power_users", "topic_consistency"] = "power_users",
+    limit: int = 10
+) -> str:
+    """
+    Analyzes user engagement patterns based on hashed IPs.
+    
+    Args:
+        behavior_type:
+            - 'power_users': Finds users with the most conversations and their favorite topics.
+            - 'topic_consistency': Finds users who are "Specialists" (stick to 1 topic) vs "Generalists".
+        limit: Max rows to return.
+
+    Returns:
+        JSON string.
+        Example (power_users):
+        [
+            {
+                "hashed_ip": "a1b2...",
+                "total_convos": 150,
+                "favorite_topic": "Coding",
+                "avg_turns": 25
+            }, ...
+        ]
+    """
+    con = get_db_connection()
+    try:
+        base_filter = "topic IS NOT NULL AND topic != 'General / Noise'"
+        if behavior_type == "power_users":
+            query = f"""
+                SELECT 
+                    hashed_ip,
+                    COUNT(*) as total_convos,
+                    mode(topic) as favorite_topic, -- Most frequent topic
+                    CAST(AVG(turn_count) AS INTEGER) as avg_turns
+                FROM wildchat
+                WHERE {base_filter}
+                GROUP BY hashed_ip
+                ORDER BY total_convos DESC
+                LIMIT ?
+            """
+        else:
+            # Identify "Specialists" 
+            query = f"""
+                SELECT 
+                    hashed_ip,
+                    COUNT(*) as total_convos,
+                    COUNT(DISTINCT topic) as distinct_topics,
+                    mode(topic) as main_interest
+                FROM wildchat
+                WHERE {base_filter}
+                GROUP BY hashed_ip
+                HAVING total_convos > 10 -- Only analyze recurring users
+                ORDER BY (CAST(distinct_topics AS FLOAT) / total_convos) ASC -- Low ratio = Specialist
+                LIMIT ?
+            """
+        
+        df = con.execute(query, [limit]).fetchdf()
+        return json.dumps(df.to_dict(orient='records'), indent=2)
+
+    except Exception as e:
+        return f"Error analyzing behavior: {str(e)}"
+    finally:
+        con.close()
+
+def detect_conversation_anomalies(
+    anomaly_type: Literal["length_outlier", "rare_topic"] = "length_outlier",
+    model: Optional[str] = None,
+    threshold: float = 10.0
+) -> str:
+    """
+    Finds specific anomalous conversations for inspection.
+    Use this to discover "Edge Cases" or potential jailbreaks/errors.
+
+    Args:
+        anomaly_type:
+            - 'length_outlier': Finds conversations > 10x (threshold) the average length.
+            - 'rare_topic': Finds conversations in topics that appear less than N times.
+        model: Filter by model family (optional).
+        threshold: Multiplier for length outliers (default 10.0x avg).
+
+    Returns:
+        JSON string list of Discovery Summaries (ID, Snippet, Reason).
+        Structure:
+        [
+            {
+                "id": "...", 
+                "model_family": "...",
+                "snippet": "...", 
+                "metric_value": 150, 
+                "avg_benchmark": 40 or topic: "Quantum Computing"
+            }
+        ]
+        
+        IMPORTANT: Use the 'id' to call `get_conversation_content` for deep inspection.
+    """
+    con = get_db_connection()
+    try:
+        model_list = [model] if model else None
+        where_clause, params = _build_filters(model_list, None, None, None)
+        
+        if anomaly_type == "length_outlier":
+            avg_query = f"SELECT AVG(turn_count) FROM wildchat {where_clause}"
+            avg_turns = con.execute(avg_query, params).fetchone()[0] or 0
+            
+            # 2. Find Outliers
+            target = avg_turns * threshold
+            
+            query = f"""
+                SELECT 
+                    id, 
+                    model_family, 
+                    turn_count as metric_value,
+                    {int(avg_turns)} as avg_benchmark,
+                    substr(search_text, 1, 100) as snippet
+                FROM wildchat
+                {where_clause} 
+                {'AND' if where_clause else 'WHERE'} turn_count > ?
+                ORDER BY turn_count DESC
+                LIMIT 10
+            """
+            params.append(target)
+            
+        elif anomaly_type == "rare_topic":
+            # Find topics with very few conversations (Potential hallucinations or niche attacks)
+            query = f"""
+                WITH RareTopics AS (
+                    SELECT topic 
+                    FROM wildchat 
+                    GROUP BY topic 
+                    HAVING COUNT(*) < 50
+                )
+                SELECT 
+                    id, model_family, topic, substr(search_text, 1, 100) as snippet
+                FROM wildchat
+                WHERE topic IN (SELECT topic FROM RareTopics)
+                LIMIT 10
+            """
+            
+        else:
+            return "Error: Unknown anomaly type."
+
+        df = con.execute(query, params).fetchdf()
+        
+        if df.empty:
+            return "No anomalies found with current thresholds."
+            
+        return json.dumps(df.to_dict(orient='records'), indent=2)
+
+    except Exception as e:
+        return f"Error detecting anomalies: {str(e)}"
+    finally:
+        con.close()
+
 # ================= Micro retrieval Tool =================
+
 def get_conversation_content(conversation_id: str) -> str:
     """
     Retrieves the FULL content of a specific conversation by ID.
@@ -539,3 +694,7 @@ def get_conversation_content(conversation_id: str) -> str:
         return f"Error retrieving conversation: {str(e)}"
     finally:
         con.close()
+        
+
+        
+        
