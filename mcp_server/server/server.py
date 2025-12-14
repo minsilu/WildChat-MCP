@@ -68,4 +68,4 @@ def conversation_resource(id: str) -> str:
 if __name__ == "__main__":
 
     print("Starting WildChat MCP Server...")
-    mcp.run()
+    mcp.run(transport='stdio')

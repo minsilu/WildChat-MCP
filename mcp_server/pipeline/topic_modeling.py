@@ -263,7 +263,7 @@ def run_turbo_pipeline():
 
     con.execute("CREATE OR REPLACE TABLE topic_updates AS SELECT * FROM update_df")
     
-    con.execute("PRAGMA memory_limit='75GB'")
+    con.execute("PRAGMA memory_limit='70GB'")
     con.execute("PRAGMA temp_directory='/private/m248lu/duckdb_temp.tmp'")
     
     print("   Rewriting table (CTAS)...")
