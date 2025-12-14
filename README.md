@@ -202,7 +202,7 @@ To use the WildChat MCP server locally with Claude Desktop, we utilize the `stdi
   }
 }
 ```
-### 4. MCP Server Architecture
+### 3. MCP Server Architecture
 
 The server is structured modularly to separate tool logic, resource access, and prompt engineering.
 
