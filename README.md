@@ -57,7 +57,7 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 * **Model Comparison:** — Are there stylistic or structural differences between responses from different models (e.g., GPT-4 vs. Claude vs. Gemini)?
 
 **Results:**
-* ** Question1 **
+* ** Question1 ** -    
 Top 15 ask category：   
 category
 | Category            | Count |
@@ -79,7 +79,7 @@ category
 | Science             | 805   |
 
 Name: count, dtype: int64
-* ** Question2 **
+* ** Question2 ** -    
 Top 15 ask languages:   
 language
 | Language     | Count |
@@ -124,7 +124,7 @@ error
 | wrong signals                                     | 8     |
 
 Name: count, dtype: int64
-* ** Question3 **
+* ** Question3 ** -    
 | Statistic | Num Turns | User Turns | Assistant Turns | Total Chars |
 |----------:|----------:|-----------:|----------------:|------------:|
 | count     | 3,199,860 | 3,199,860  | 3,199,860       | 3,199,860   |
@@ -164,7 +164,7 @@ Third, technical topics, such as GPT Arguments, File Handling & Memory and Andro
 
 Overall, the results indicate that conversation length is strongly topic-dependent. Topics involving personal expression, creative description, or complex technical reasoning tend to generate significantly longer user texts than factual or transactional queries. This supports the conclusion that engagement and interaction depth vary systematically across topics.
 
-* ** Question4 **
+* ** Question4 ** -    
 
 Here is the output :Comparison of response characteristics across different language models, including verbosity, lexical diversity, and structural features.
 
