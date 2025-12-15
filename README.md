@@ -23,7 +23,7 @@ This repository constitutes our final deliverable for CS 651. It addresses both 
 |     ├── prompts.py                    # MCP Prompts
 |     ├── resources.py                  # MCP Resources
 |     ├── tools.py                      # MCP Tools
-|     ├── server.py                     # MCP Tools
+|     ├── server.py                     # Entry file of our MCP server
 |     └── mcp_demo.mp4                  # Demo of the interaction between MCP and LLM
 ├── pipeline/                           # [Extra] Advanced ETL & Hybrid Topic Modeling Scripts
 │     ├── ingest.py                     # Cleans and imports raw data into DuckDB
