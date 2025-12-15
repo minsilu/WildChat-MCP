@@ -17,13 +17,21 @@ This repository constitutes our final deliverable for CS 651. It addresses both 
 .
 ├── README.md                           # This file (Project Overview & Setup) 
 ├── insights/
-│       ├── final project.ipynb         # [Point 2] Main Data Science Analysis Notebook
+│       ├── wildchat_analysis.ipynb     # [Point 2] Main Data Science Analysis Notebook
 |       └── wildchat_analysis_mcp.ipynb # [Point 2/3] Bridge: From Insights to MCP Tool Design
 ├── server/                             # [Point 3] The MCP Server Implementation
+|     ├── prompts.py                    # MCP Prompts
+|     ├── resources.py                  # MCP Resources
+|     ├── tools.py                      # MCP Tools
+|     └── server.py                     # Entry file to launch the MCP service
 ├── pipeline/                           # [Extra] Advanced ETL & Hybrid Topic Modeling Scripts
-│   └── ...
-├── wildchat_clean.parquet              # Processed Data Sample
-└── proposal 1.pdf
+│     ├── ingest.py                     # Cleans and imports raw data into DuckDB
+|     ├── topic_modeling.py             # Extract topics and writes back to DB
+|     ├── create_indices.py             # Creates FTS and B-treee indices 
+|     └── create_meta.py                # Pre-computes global statistics
+├── config.py              
+├── requirements.txt              
+└── proposal.pdf
 
 ```
 ## Environment Setup
@@ -42,7 +50,7 @@ pip install -r requirements.txt
 ## 🔬 [Point 2] Data Science Insights (Requirement 2)
 
 
-**Notebook:** [`final project.ipynb`](./final%20project.ipynb) 
+**Notebook:** [`wildchat_analysis.ipynb`](https://github.com/minsilu/cs651-final/blob/main/insights/wildchat_analysis.ipynb) 
 
 Inspired by the "Science of Science" (an exploration of how science gets done), we conducted a scientific exploration of **how "Prompt Engineering" gets done**. Just as one might analyze ACM Fellows to understand Computer Science trends, we analyzed the **WildChat Dataset** (`allenai/WildChat-4.8M`) to understand the current state of Human-AI interaction.
 
@@ -64,7 +72,7 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 
 ## 🌉 [Point 2/3] From Insights to MCP Tool Design
 
-**Notebook:** [`mcp_server/analysis/wildchat_analysis_mcp.ipynb`](./mcp_server/analysis/wildchat_analysis_mcp.ipynb)
+**Notebook:** [`wildchat_analysis_mcp.ipynb`](https://github.com/minsilu/cs651-final/blob/main/insights/wildchat_data_analytics.ipynb)
 
 This notebook acts as the **architectural bridge** between our data science insights and the final MCP Server implementation. Rather than deploying black-box code, we used this environment to **prototype, validate, and unit-test** every tool's logic against the live dataset.
 
@@ -215,7 +223,7 @@ The server is structured modularly to separate tool logic, resource access, and 
 
 * **`tools.py` (Functional Logic):**
     * Contains the core Python implementation of our analytical layers (Meta, Macro, Discovery, Micro).
-    * Each function here (e.g., `get_topic_stats`, `search_conversations`) connects to DuckDB, executes optimized SQL, and returns JSON strings formatted for the LLM. All the tool's design we introduce in part [point 2/3]()
+    * Each function here (e.g., `get_topic_stats`, `search_conversations`) connects to DuckDB, executes optimized SQL, and returns JSON strings formatted for the LLM. All the tool's design we introduce in part [`point 2/3`] (#-point-23-from-insights-to-mcp-tool-design)
 
 * **`resources.py` (Direct Data Access):**
     * Implements URI-based data retrieval (`wildchat://...`).
