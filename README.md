@@ -56,6 +56,141 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 * **Conversation Length and Engagement:** — How long are typical conversations? Are certain topics associated with longer or more interactive dialogues?
 * **Model Comparison:** — Are there stylistic or structural differences between responses from different models (e.g., GPT-4 vs. Claude vs. Gemini)?
 
+**Results:**
+* ** Question1 **
+Top 15 ask category：   
+category
+| Category            | Count |
+|---------------------|-------|
+| Creative Writing    | 82432 |
+| Error               | 81613 |
+| Roleplay            | 74593 |
+| General Knowledge   | 52852 |
+| Coding              | 39774 |
+| Reasoning           | 17980 |
+| Translation         | 10225 |
+| Advice              | 8789  |
+| Math                | 7285  |
+| Data Analysis       | 5747  |
+| Other               | 4851  |
+| History             | 1056  |
+| Travel              | 865   |
+| Chemistry           | 809   |
+| Science             | 805   |
+
+Name: count, dtype: int64
+* ** Question2 **
+Top 15 ask languages:   
+language
+| Language     | Count |
+|--------------|-------|
+| Python       | 12786 |
+| Javascript   | 5355  |
+| English      | 4415  |
+| Java         | 2839  |
+| C#           | 2225  |
+| C++          | 2201  |
+| C            | 1189  |
+| Vba          | 817   |
+| Sql          | 576   |
+| Lua          | 564   |
+| Matlab       | 540   |
+| Php          | 519   |
+| Html         | 441   |
+| Typescript   | 439   |
+| R            | 418   |
+
+Name: count, dtype: int64
+
+Top 15 Error message：
+
+error
+| Error Message                                      | Count |
+|---------------------------------------------------|-------|
+| SyntaxError                                       | 467   |
+| SyntaxError: invalid syntax                       | 89    |
+| SyntaxError: unexpected EOF while parsing         | 24    |
+| IndexError: list index out of range                | 22    |
+| Segmentation fault                                | 14    |
+| TODO                                              | 13    |
+| undefined                                         | 10    |
+| SyntaxError: EOL while scanning string literal     | 10    |
+| java.lang.NullPointerException                    | 9     |
+| IndentationError: expected an indented block       | 9     |
+| TypeError: 'NoneType' object is not subscriptable  | 9     |
+| SyntaxError: invalid character ‘’ in string        | 9     |
+| SyntaxError: Unexpected end of input               | 8     |
+| NameError: name 'name' is not defined              | 8     |
+| wrong signals                                     | 8     |
+
+Name: count, dtype: int64
+* ** Question3 **
+| Statistic | Num Turns | User Turns | Assistant Turns | Total Chars |
+|----------:|----------:|-----------:|----------------:|------------:|
+| count     | 3,199,860 | 3,199,860  | 3,199,860       | 3,199,860   |
+| mean      | 3.229630  | 1.614815   | 1.614815        | 9,358.622   |
+| std       | 5.081712  | 2.540856   | 2.540856        | 26,823.75   |
+| min       | 2         | 1          | 1               | 1           |
+| 50%       | 2         | 1          | 1               | 2,799       |
+| 75%       | 2         | 1          | 1               | 6,333       |
+| 90%       | 6         | 3          | 3               | 22,091      |
+| 95%       | 10        | 5          | 5               | 45,466      |
+| max       | 1,000     | 500        | 500             | 1,091,961   |
+
+Most conversations are short, with a median of two total turns (one user turn and one assistant turn). However, a small fraction of conversations are significantly longer, as reflected by the heavy-tailed distribution in both turn counts and total character length.   
+| Theme | Average Words per Text |
+|------|------------------------|
+| Infinity, Secrets, Truth & Relationships | 1457.6 |
+| Musician Errors & City Context | 1409.7 |
+| Jewelry, Women, Rings & Chains | 1234.9 |
+| GPT Arguments, File Handling & Memory | 1126.5 |
+| Device, Vectors & Include Statements | 836.2 |
+| Baby Room & Personal Life Questions | 635.6 |
+| Informal Dialogue & Casual Queries | 602.6 |
+| Illegal or Fictional Dialogue Scenarios | 501.0 |
+| Nail, Hair & DIY Art | 500.2 |
+| Android Views, Products & Imports | 480.1 |
+
+We analyze conversation length by measuring the average number of words in user texts for each topic.
+The table above reports the top 10 topics with the longest average text length.
+
+Several clear patterns emerge from this analysis.
+
+First, topics related to abstract concepts and personal narratives, such as Infinity, Secrets, Truth & Relationships, exhibit the longest average text length. These conversations often involve storytelling, emotional reflection, or philosophical discussion, which naturally leads to long, detailed user inputs.
+
+Second, creative and lifestyle-related topics, including Jewelry Design, Nail and Hair DIY Art, and Personal Life Questions, also show relatively long texts. These topics frequently require descriptive language and contextual background, resulting in higher word counts.
+
+Third, technical topics, such as GPT Arguments, File Handling & Memory and Android Views and Imports, demonstrate substantial text length as well. This suggests that technical problem-solving often involves detailed explanations, code context, and iterative clarification, leading to longer user messages.
+
+Overall, the results indicate that conversation length is strongly topic-dependent. Topics involving personal expression, creative description, or complex technical reasoning tend to generate significantly longer user texts than factual or transactional queries. This supports the conclusion that engagement and interaction depth vary systematically across topics.
+
+* ** Question4 **
+
+Here is the output :Comparison of response characteristics across different language models, including verbosity, lexical diversity, and structural features.
+
+====== stylistic or structural differences from different models (average) ======
+
+| Model          | Word Count | Lexical Diversity | Avg Word Length | Has Code | Has List |
+|----------------|------------|-------------------|-----------------|----------|----------|
+| gpt-3.5-turbo  | 112.0154   | 0.850464          | 6.755645        | 0.0036   | 0.0416   |
+| gpt-4          | 266.6674   | 0.791679          | 6.975801        | 0.0026   | 0.0700   |
+| gpt-4o         | 445.7236   | 0.798059          | 6.405032        | 0.0090   | 0.0568   |
+| o1             | 306.8714   | 0.798521          | 6.489153        | 0.0280   | 0.0824   |
+
+
+detailed data analysis saved as 'model_style_comparison.csv
+
+
+
+====== simple result ======
+
+1. model with longest conversation is : gpt-4o (445.7 words)
+
+2. modes always contains code is : o1 (contribute to 2.8%)
+
+3. model most repetively uses word is : gpt-4
+
+
 **Methodology:**
 * **Data Ingestion:** Loaded via the `datasets` library (`load_dataset("allenai/WildChat-4.8M")`).
 * **Cleaning:** Filtered out "General/Noise" conversations (prompts <10 chars) to focus on substantive interactions.
