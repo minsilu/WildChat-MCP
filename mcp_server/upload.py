@@ -14,23 +14,23 @@ print("starting upload...")
 
 
 api.upload_file(
-    path_or_fileobj="wildchat.duckdb.zst",  
-    path_in_repo="wildchat.duckdb.zst",     
+    path_or_fileobj="wildchat.db.zst",  
+    path_in_repo="wildchat.db.zst",     
     repo_id=repo_id,
     repo_type="dataset"
 )
 
-api.upload_file(
-    path_or_fileobj="schema.sql",
-    path_in_repo="schema.sql",
-    repo_id=repo_id,
-    repo_type="dataset"
-)
+# api.upload_file(
+#     path_or_fileobj="schema.sql",
+#     path_in_repo="schema.sql",
+#     repo_id=repo_id,
+#     repo_type="dataset"
+# )
 
-api.upload_file(
-    path_or_fileobj="scripts/build_indexes.py",
-    path_in_repo="scripts/build_indexes.py",
-    repo_id=repo_id,
-    repo_type="dataset"
-)
+# api.upload_file(
+#     path_or_fileobj="scripts/build_indexes.py",
+#     path_in_repo="scripts/build_indexes.py",
+#     repo_id=repo_id,
+#     repo_type="dataset"
+# )
 

@@ -19,6 +19,7 @@ N_CLUSTERS = 50
 DIMENSIONS = 5              
 OLLAMA_MODEL = "qwen2.5:7b"  
 OLLAMA_URL = "http://localhost:11434/api/generate"
+EMBEDDING_FILE = "/private/m248lu/wildchat_embeddings.npy"
 # ==========================================
 
 def run_fast_pipeline():
@@ -186,6 +187,8 @@ def run_turbo_pipeline():
         convert_to_numpy=True,
         normalize_embeddings=True
     )
+    np.save(EMBEDDING_FILE, embeddings)
+    
     del embedding_model
     gc.collect()
     torch.cuda.empty_cache()
@@ -241,7 +244,9 @@ def run_turbo_pipeline():
         
 
         human_label = get_label_from_ollama(cluster_id, keywords, samples)
-        
+        if not human_label or human_label.strip() == "" or "None" in str(human_label):
+            human_label = "General"
+            
         label_map[cluster_id] = human_label
         print(f"   Cluster {cluster_id:02d}: {human_label} \n      (Ctx: {', '.join(keywords[:3])}...)")
 
@@ -249,6 +254,9 @@ def run_turbo_pipeline():
     del cluster_model
     del reduced_embeddings
     del X
+    del cluster_docs
+    del df
+    del docs
     gc.collect()
 
     print(f"\n[Step 6/6] Writing to Database (CTAS Strategy)...")
@@ -262,27 +270,30 @@ def run_turbo_pipeline():
     })
 
     con.execute("CREATE OR REPLACE TABLE topic_updates AS SELECT * FROM update_df")
+    del update_df
+    gc.collect()
+    con.close()
     
-    con.execute("PRAGMA memory_limit='70GB'")
-    con.execute("PRAGMA temp_directory='/private/m248lu/duckdb_temp.tmp'")
-    
-    print("   Rewriting table (CTAS)...")
+    # con.execute("PRAGMA memory_limit='70GB'")
+    # con.execute("PRAGMA temp_directory='/private/m248lu/duckdb_temp.tmp'")
+    con = duckdb.connect(DB_FILE)
+    con.execute("PRAGMA memory_limit='70GB'") 
+    print("   Performing Update (Using efficient UPDATE)...")
     con.execute("""
-        CREATE OR REPLACE TABLE wildchat_new AS 
-        SELECT 
-            w.* EXCLUDE (topic),
-            COALESCE(t.new_topic, 'General') as topic
-        FROM wildchat w
-        LEFT JOIN topic_updates t ON w.id = t.id
+        UPDATE wildchat 
+        SET topic = t.new_topic
+        FROM topic_updates t
+        WHERE wildchat.id = t.id
     """)
-    
-    con.execute("DROP TABLE wildchat")
-    con.execute("ALTER TABLE wildchat_new RENAME TO wildchat")
     con.execute("DROP TABLE topic_updates")
     
+    print("   Running VACUUM to reclaim disk space...")
+    con.execute("VACUUM")
     print(f"   Database updated in {time.time()-t0:.1f} seconds.")
     print(f"Pipeline Complete! Total Time: {(time.time()-start_global)/60:.1f} minutes.")
+    
     con.close()
+
 if __name__ == "__main__":
     print("Running Topic Modeling Pipeline with Ollama...")
     try:

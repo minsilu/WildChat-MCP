@@ -106,7 +106,7 @@ To address unanticipated questions that pre-defined functions cannot cover (the 
 
 ## 🛠️ [Point 3] MCP Implementation 
 **Demo Video:** [🔗 Click Here to Watch the Demo](YOUR_VIDEO_LINK_HERE)  
-**Dataset on HuggingFace:** [🔗 WildChat-CS651](YOUR_HF_LINK_HERE)
+**Dataset on HuggingFace:** [🔗 WildChat-CS651](https://huggingface.co/datasets/luminlemon/wildchat-cs651/tree/main)
 
 While the previous section detailed the *design logic* and content of our tools, this section focuses on the **system architecture and engineering pipeline** required to make those tools performant. We utilize a **Local Server + Claude Desktop** architecture, where the MCP server runs locally on the user's machine (accessing the local DuckDB instance) and connects to Claude via `stdio`.
 
@@ -151,7 +151,7 @@ Optimizes the database for the two distinct search patterns of the MCP Agent:
 To reproduce the full database build locally (requires ~50GB disk space + Nvidia GPU for clustering):
 ```bash
 # ================= PHASE 1: Heavy Processing =================
-# (Skip this phase if you downloaded 'luminlemon/wildchat-cs651' in we provided before)
+# (Skip this phase if you downloaded 'luminlemon/wildchat-cs651' in https://huggingface.co/datasets/luminlemon/wildchat-cs651/tree/main)
 
 # 1. Ingest Data (Streams ~1.6M rows)
 python pipeline/ingest.py
