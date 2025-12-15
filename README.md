@@ -31,8 +31,7 @@ This repository constitutes our final deliverable for CS 651. It addresses both 
 |     ├── create_indices.py             # Creates FTS and B-treee indices 
 |     └── create_meta.py                # Pre-computes global statistics
 ├── config.py              
-├── requirements.txt              
-└── proposal.pdf
+└── requirements.txt              
 
 ```
 ## Environment Setup
