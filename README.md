@@ -56,7 +56,7 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 * **Conversation Length and Engagement:** — How long are typical conversations? Are certain topics associated with longer or more interactive dialogues?
 * **Model Comparison:** — Are there stylistic or structural differences between responses from different models (e.g., GPT-4 vs. Claude vs. Gemini)?
 
-**Results:**
+**Results:**   
 *============================Question1 Result============================*  
 Top 15 ask category：   
 category
@@ -78,7 +78,7 @@ category
 | Chemistry           | 809   |
 | Science             | 805   |
 
-Name: count, dtype: int64
+Name: count, dtype: int64   
 *============================Question2 Result============================*  
 Top 15 ask languages:   
 language
@@ -123,7 +123,7 @@ error
 | NameError: name 'name' is not defined              | 8     |
 | wrong signals                                     | 8     |
 
-Name: count, dtype: int64
+Name: count, dtype: int64   
 *============================Question3 Result============================*  
 | Statistic | Num Turns | User Turns | Assistant Turns | Total Chars |
 |----------:|----------:|-----------:|----------------:|------------:|
@@ -162,8 +162,7 @@ Second, creative and lifestyle-related topics, including Jewelry Design, Nail an
 
 Third, technical topics, such as GPT Arguments, File Handling & Memory and Android Views and Imports, demonstrate substantial text length as well. This suggests that technical problem-solving often involves detailed explanations, code context, and iterative clarification, leading to longer user messages.
 
-Overall, the results indicate that conversation length is strongly topic-dependent. Topics involving personal expression, creative description, or complex technical reasoning tend to generate significantly longer user texts than factual or transactional queries. This supports the conclusion that engagement and interaction depth vary systematically across topics.
-
+Overall, the results indicate that conversation length is strongly topic-dependent. Topics involving personal expression, creative description, or complex technical reasoning tend to generate significantly longer user texts than factual or transactional queries. This supports the conclusion that engagement and interaction depth vary systematically across topics.   
 *============================Question4 Result============================*  
 
 Here is the output :Comparison of response characteristics across different language models, including verbosity, lexical diversity, and structural features.
