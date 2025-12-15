@@ -72,7 +72,7 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 
 ## 🌉 [Point 2/3] From Insights to MCP Tool Design
 
-**Notebook:** [`wildchat_analysis_mcp.ipynb`](https://github.com/minsilu/cs651-final/blob/main/insights/wildchat_data_analytics.ipynb)
+**Notebook:** [`wildchat_analysis_mcp.ipynb`](https://github.com/minsilu/cs651-final/blob/main/insights/wildchat_data_analysis.ipynb)
 
 This notebook acts as the **architectural bridge** between our data science insights and the final MCP Server implementation. Rather than deploying black-box code, we used this environment to **prototype, validate, and unit-test** every tool's logic against the live dataset.
 
@@ -223,7 +223,7 @@ The server is structured modularly to separate tool logic, resource access, and 
 
 * **`tools.py` (Functional Logic):**
     * Contains the core Python implementation of our analytical layers (Meta, Macro, Discovery, Micro).
-    * Each function here (e.g., `get_topic_stats`, `search_conversations`) connects to DuckDB, executes optimized SQL, and returns JSON strings formatted for the LLM. All the tool's design we introduce in part [`point 2/3`] (#-point-23-from-insights-to-mcp-tool-design)
+    * Each function here (e.g., `get_topic_stats`, `search_conversations`) connects to DuckDB, executes optimized SQL, and returns JSON strings formatted for the LLM. All the tool's design we introduce in part [`point 2/3`](#-point-23-from-insights-to-mcp-tool-design)
 
 * **`resources.py` (Direct Data Access):**
     * Implements URI-based data retrieval (`wildchat://...`).
