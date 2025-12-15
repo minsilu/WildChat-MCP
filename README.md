@@ -5,7 +5,7 @@
 
 ## 📖 Project Overview
 
-This repository constitutes our final deliverable for CS 651. It addresses both key requirements of the project through a unified exploration of the **WildChat Dataset** (1.6M+ user-ChatGPT English interactions):
+This repository constitutes our final deliverable for CS 651. It addresses both key requirements of the project through a unified exploration of the **WildChat Dataset** (1.4M+ unique user-ChatGPT English interactions):
 
 1.  **Data Science Insights (Addressing Point 2):** An introspective examination of the "Science of Human-AI Interaction," analyzing how users engage with LLMs, how topics evolve, and identifying behavioral archetypes.
 2.  **MCP Implementation (Addressing Point 3):** The implementation of a **Model Context Protocol (MCP) Server**, transforming our static data insights into a dynamic, queryable agent that allows LLMs to "explore" the dataset autonomously.
