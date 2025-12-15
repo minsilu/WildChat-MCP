@@ -51,15 +51,15 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 * **Scale:** A massive public corpus of user-ChatGPT interactions, filtered and processed for this analysis.
 
 **Key Research Questions:**
-* **Prompt Topic Distribution:** What are the most common themes users discuss with LLMs? We categorized interactions into distinct domains such as *coding, creative writing, reasoning, and education* to visualize the landscape of user intent.
-* **Conversation Length & Engagement:** How long are typical conversations? We analyzed turn counts to determine if certain topics (e.g., Coding) are associated with longer, more interactive debugging sessions compared to simple Q&A.
-* **Model Comparison:** Are there structural differences between responses from different model families? We compared metadata between models (e.g., GPT-3.5 vs. GPT-4) to see how user behavior shifts with model capability.
-* **Temporal Trends:** How has user interaction evolved over time? We mapped query volume and topic shifts before and after major model releases.
+* **Prompt Topic Distribution:** —  What are the most common themes users discuss with LLMs? We categorized interactions into distinct domains such as *coding, creative writing, reasoning, and education* to visualize the landscape of user intent.
+* **Content Distribution:** - What are the top 15 programming languages used by programmers, based on the volume of conversations? What are the top 15 types of programming errors that programmers most frequently fail to resolve on their own, based on error frequency?
+* **Conversation Length and Engagement:** — How long are typical conversations? Are certain topics associated with longer or more interactive dialogues?
+* **Model Comparison:** — Are there stylistic or structural differences between responses from different models (e.g., GPT-4 vs. Claude vs. Gemini)?
 
 **Methodology:**
 * **Data Ingestion:** Loaded via the `datasets` library (`load_dataset("allenai/WildChat-4.8M")`).
 * **Cleaning:** Filtered out "General/Noise" conversations (prompts <10 chars) to focus on substantive interactions.
-* **Analytics:** Applied statistical aggregation on turn counts and topic frequencies.
+* **Analytics:** Applied statistical aggregation on turn counts and topic frequencies. Because the conversation contains different languages, so I feed back the conversation into AI API to let AI generate the conversation topic and then I save the topic into a dataframe and count.
 * **Visualization:** Generated distribution graphs for topics and temporal heatmaps to reveal engagement patterns.
 
 ## 🌉 [Point 2/3] From Insights to MCP Tool Design
