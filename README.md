@@ -78,17 +78,17 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 This notebook acts as the **architectural bridge** between our data science insights and the final MCP Server implementation. Rather than deploying black-box code, we used this environment to **prototype, validate, and unit-test** every tool's logic against the live dataset.
 
 **Design Philosophy: "Macro-Analytics, Micro-Inspection"**
-To enable an LLM Agent to effectively navigate 1.6M+ records without context overflow, we engineered a hierarchical information retrieval funnel. This structure dictated the specific design of our MCP tools:
+To enable an LLM Agent to effectively navigate 1.4M+ records without context overflow, we engineered a hierarchical information retrieval funnel. This structure dictated the specific design of our MCP tools:
 
 ### 1. Meta-Analytics (The Map)
 Before diving into specific data points, an agent must understand the dataset's shape, schema, and boundaries.
-* **Logic:** Instead of scanning 30GB of data on-the-fly for basic counts, we query pre-computed metadata tables for O(1) latency.
+* **Logic:** Instead of scanning 37GB of data on-the-fly for basic counts, we query pre-computed metadata tables for O(1) latency.
 * **Tools Prototyped:**  
     * `get_dataset_summary`: Provides instant access to total counts, date ranges, and distributions.
     * `get_db_schema`: Allows the LLM to understand table structures and column types to formulate accurate queries.
 
 ### 2. Macro-Analytics (The Compass)
-Since the LLM cannot read 1.6M rows at once, these tools "compress" vast data into digestible statistical insights, enabling high-level pattern recognition.
+Since the LLM cannot read 1.4M rows at once, these tools "compress" vast data into digestible statistical insights, enabling high-level pattern recognition.
 * **Logic:** Aggregates data to quantify themes, compare model behaviors (e.g., GPT-4 vs. Claude), and visualize evolution over time.
 * **Tools Prototyped:** 
     * `get_topic_stats`: Aggregates volume by topic for distribution analysis. Also allow LLM compares models' topic difference.
@@ -131,7 +131,7 @@ BATCH_SIZE = 10000                    # Optimized for limited RAM
 ```
 ### 1. The Data Pipeline (ETL)
 
-To transform 1.6M raw logs into a queryable knowledge base, we implemented a robust 4-stage ETL pipeline.
+To transform 1.4M raw logs into a queryable knowledge base, we implemented a robust 4-stage ETL pipeline.
 
 #### **Stage 1: Ingestion (`ingest.py`)**
 We stream data directly from Hugging Face (`streaming=True`) to avoid local disk bottlenecks.
@@ -145,7 +145,7 @@ A sophisticated pipeline that goes beyond simple keyword matching.
 3.  **LLM Labeling (Ollama Integration):**
     * Instead of numeric Cluster IDs (e.g., "Cluster 5"), we use a local **Qwen2.5-7B** model via **Ollama**.
     * The script feeds the top keywords and sample documents to Qwen, which generates human-readable labels (e.g., renaming a cluster full of `div`/`span` keywords to *"Web Development"*).
-4.  **Performance Optimization (CTAS):** Updating 1.6M rows in-place is slow, because the data is stored in columnar format. We use the **CTAS (Create Table As Select)** strategy to rewrite the entire table with new topics in seconds rather than minutes.
+4.  **Performance Optimization (CTAS):** Updating 1.4M rows in-place is slow, because the data is stored in columnar format. We use the **CTAS (Create Table As Select)** strategy to rewrite the entire table with new topics in seconds rather than minutes.
 
 #### **Stage 3: Indexing (`create_indices.py`)**
 Optimizes the database for the two distinct search patterns of the MCP Agent:
@@ -161,7 +161,7 @@ To reproduce the full database build locally (requires ~50GB disk space + Nvidia
 ```bash
 # (Skip this phase if you downloaded 'luminlemon/wildchat-cs651' in https://huggingface.co/datasets/luminlemon/wildchat-cs651/tree/main)
 # ================= PHASE 1: Heavy Processing =================
-# 1. Ingest Data (Streams ~1.6M rows)
+# 1. Ingest Data (Streams ~4.8M rows)
 python pipeline/ingest.py
 
 # 2. Start Local LLM Server (Required for Topic Labeling)
