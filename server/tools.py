@@ -212,21 +212,21 @@ def get_topic_stats(
                 stats = _query_single_scope([m])
                 comparison_results[m] = stats
             
-            return json.dumps({
+            return {
                 "mode": "comparison",
                 "filters": {"date": f"{start_date or 'Start'} to {end_date or 'Now'}"},
                 "comparison": comparison_results
-            }, indent=2)
+            }
             
         else:
             stats = _query_single_scope(models)
             
-            return json.dumps({
+            return {
                 "mode": "aggregate",
                 "filters": {"models": models if models else "ALL"},
                 "metadata": {"total_conversations": stats["total_conversations"]},
                 "topics": stats["data"]
-            }, indent=2)
+            }
         
     except Exception as e:
         return f"Error analyzing topics: {str(e)}"
@@ -292,7 +292,7 @@ def get_engagement_stats(
         query_params = params + [limit]
         df = con.execute(query, query_params).fetchdf()
     
-        return json.dumps(df.to_dict(orient='records'), indent=2)
+        return df.to_dict(orient='records')
         
     except Exception as e:
         return f"Error calculating engagement: {str(e)}"
@@ -349,11 +349,11 @@ def get_temporal_trends(
         
         df['period'] = df['period'].astype(str)
         
-        return json.dumps({
+        return {
             "interval": interval,
             "filters": {"topic": topic, "model": model},
             "trend_data": df.to_dict(orient='records')
-        }, indent=2)
+        }
         
     except Exception as e:
         return f"Error analyzing trends: {str(e)}"
@@ -444,7 +444,7 @@ def search_conversations(
         if df.empty:
             return "No conversations found matching criteria."
             
-        return json.dumps(df.to_dict(orient='records'), indent=2)
+        return df.to_dict(orient='records')
 
     except Exception as e:
         return f"Error searching conversations: {str(e)}"
@@ -551,7 +551,7 @@ def analyze_user_behavior(
             """
         
         df = con.execute(query, [limit]).fetchdf()
-        return json.dumps(df.to_dict(orient='records'), indent=2)
+        return df.to_dict(orient='records')
 
     except Exception as e:
         return f"Error analyzing behavior: {str(e)}"
@@ -640,7 +640,7 @@ def detect_conversation_anomalies(
         if df.empty:
             return "No anomalies found with current thresholds."
             
-        return json.dumps(df.to_dict(orient='records'), indent=2)
+        return df.to_dict(orient='records')
 
     except Exception as e:
         return f"Error detecting anomalies: {str(e)}"
@@ -662,6 +662,7 @@ def get_conversation_content(conversation_id: str) -> str:
         {
             "id": "...",
             "metadata": {"model": "...", "topic": "...", "turn_count": ...},
+            "search_text": "...",
             "conversation": [
                 {"role": "user", "content": "..."},
                 {"role": "assistant", "content": "..."}
@@ -671,24 +672,25 @@ def get_conversation_content(conversation_id: str) -> str:
     con = get_db_connection()
     try:
         result = con.execute(
-            "SELECT full_content, model, topic FROM wildchat WHERE id = ?", 
+            "SELECT search_text, full_content, model, topic FROM wildchat WHERE id = ?", 
             [conversation_id]
         ).fetchone()
         
         if not result:
             return "Error: Conversation ID not found."
             
-        content_json, model, topic = result
+        search_text, content_json, model, topic = result
         
         messages = json.loads(content_json)
         
         response = {
             "id": conversation_id,
             "metadata": {"model": model, "topic": topic, "turn_count": len(messages)},
+            "search_text": search_text,
             "conversation": messages
         }
         
-        return json.dumps(response, indent=2)
+        return response
         
     except Exception as e:
         return f"Error retrieving conversation: {str(e)}"
