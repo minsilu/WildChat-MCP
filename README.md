@@ -159,9 +159,8 @@ Optimizes the database for the two distinct search patterns of the MCP Agent:
 
 To reproduce the full database build locally (requires ~50GB disk space + Nvidia GPU for clustering):
 ```bash
-# ================= PHASE 1: Heavy Processing =================
 # (Skip this phase if you downloaded 'luminlemon/wildchat-cs651' in https://huggingface.co/datasets/luminlemon/wildchat-cs651/tree/main)
-
+# ================= PHASE 1: Heavy Processing =================
 # 1. Ingest Data (Streams ~1.6M rows)
 python pipeline/ingest.py
 
