@@ -9,17 +9,15 @@ from sentence_transformers import SentenceTransformer
 from sklearn.decomposition import PCA
 from sklearn.cluster import MiniBatchKMeans
 from sklearn.feature_extraction.text import CountVectorizer
-
+import sys
+import os
 import time
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from config import *
 
 # ================= CONFIG =================
-DB_FILE = "/private/m248lu/wildchat.db"
-BATCH_SIZE = 512         # GPU 
-N_CLUSTERS = 50             
-DIMENSIONS = 5              
-OLLAMA_MODEL = "qwen2.5:7b"  
-OLLAMA_URL = "http://localhost:11434/api/generate"
-EMBEDDING_FILE = "/private/m248lu/wildchat_embeddings.npy"
+
+
 # ==========================================
 
 def run_fast_pipeline():
@@ -99,17 +97,28 @@ def run_fast_pipeline():
         'id': ids,
         'new_topic': final_labels
     })
-
-    con.execute("CREATE OR REPLACE TABLE topic_updates AS SELECT * FROM update_df")
+    update_df = update_df.drop_duplicates(subset=['id'], keep='last')
+ 
+    con.close() 
+    con = duckdb.connect(DB_FILE)
+    con.execute("PRAGMA memory_limit='70GB'")  
+    
+    con.register('update_table_pandas', update_df)
     con.execute("""
-        UPDATE wildchat 
-        SET topic = topic_updates.new_topic
-        FROM topic_updates
-        WHERE wildchat.id = topic_updates.id
+        BEGIN TRANSACTION;
+        MERGE INTO wildchat AS w
+        USING update_table_pandas AS t
+        ON w.id = t.id
+        WHEN MATCHED THEN UPDATE SET topic = t.new_topic;
+        COMMIT;
     """)
-    con.execute("DROP TABLE topic_updates")
-    print("Database Updated Successfully.")
-    print(f"Total Time: {(time.time()-start_global)/60:.1f} minutes.")
+    print("   Running VACUUM to reclaim disk space...")
+    con.execute("VACUUM")
+    
+    print(f"   Database updated in {time.time()-t0:.1f} seconds.")
+    print(f"Pipeline Complete! Total Time: {(time.time()-start_global)/60:.1f} minutes.")
+    
+    con.close()
 
 
 def get_label_from_ollama(cluster_id, keywords, sample_texts):
@@ -178,21 +187,25 @@ def run_turbo_pipeline():
     print(f"   Loaded {len(docs):,} documents.")
 
     print(f"\n[Step 2/6] Calculating Embeddings...")
-    t0 = time.time()
-    embedding_model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
-    embeddings = embedding_model.encode(
-        docs, 
-        batch_size=BATCH_SIZE, 
-        show_progress_bar=True, 
-        convert_to_numpy=True,
-        normalize_embeddings=True
-    )
-    np.save(EMBEDDING_FILE, embeddings)
-    
-    del embedding_model
-    gc.collect()
-    torch.cuda.empty_cache()
-    print(f"   Embeddings calculated in {(time.time()-t0)/60:.1f} minutes.")
+    if os.path.exists(EMBEDDING_FILE):
+        print(f"   Found existing embeddings file: {EMBEDDING_FILE}. Loading and skipping calculation.")
+        embeddings = np.load(EMBEDDING_FILE)
+    else:
+        t0 = time.time()
+        embedding_model = SentenceTransformer("all-MiniLM-L6-v2", device=device)
+        embeddings = embedding_model.encode(
+            docs, 
+            batch_size=BATCH_SIZE, 
+            show_progress_bar=True, 
+            convert_to_numpy=True,
+            normalize_embeddings=True
+        )
+        np.save(EMBEDDING_FILE, embeddings)
+        
+        del embedding_model
+        gc.collect()
+        torch.cuda.empty_cache()
+        print(f"   Embeddings calculated in {(time.time()-t0)/60:.1f} minutes.")
 
     print(f"\n[Step 3/6] Dimensionality Reduction (PCA)...")
     t0 = time.time()
@@ -268,24 +281,24 @@ def run_turbo_pipeline():
         'id': ids,
         'new_topic': final_labels
     })
-
-    con.execute("CREATE OR REPLACE TABLE topic_updates AS SELECT * FROM update_df")
-    del update_df
-    gc.collect()
+    update_df = update_df.drop_duplicates(subset=['id'], keep='last')
     con.close()
     
     # con.execute("PRAGMA memory_limit='70GB'")
     # con.execute("PRAGMA temp_directory='/private/m248lu/duckdb_temp.tmp'")
     con = duckdb.connect(DB_FILE)
     con.execute("PRAGMA memory_limit='70GB'") 
-    print("   Performing Update (Using efficient UPDATE)...")
+    print("   Performing Update...")
+    con.register('update_table_pandas', update_df)
     con.execute("""
-        UPDATE wildchat 
-        SET topic = t.new_topic
-        FROM topic_updates t
-        WHERE wildchat.id = t.id
+        BEGIN TRANSACTION;
+        MERGE INTO wildchat AS w
+        USING update_table_pandas AS t
+        ON w.id = t.id
+        WHEN MATCHED THEN UPDATE SET topic = t.new_topic;
+        COMMIT;
     """)
-    con.execute("DROP TABLE topic_updates")
+    con.unregister('update_table_pandas')
     
     print("   Running VACUUM to reclaim disk space...")
     con.execute("VACUUM")
@@ -293,6 +306,7 @@ def run_turbo_pipeline():
     print(f"Pipeline Complete! Total Time: {(time.time()-start_global)/60:.1f} minutes.")
     
     con.close()
+    
 
 if __name__ == "__main__":
     print("Running Topic Modeling Pipeline with Ollama...")

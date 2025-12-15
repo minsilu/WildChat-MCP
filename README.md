@@ -23,7 +23,8 @@ This repository constitutes our final deliverable for CS 651. It addresses both 
 |     ├── prompts.py                    # MCP Prompts
 |     ├── resources.py                  # MCP Resources
 |     ├── tools.py                      # MCP Tools
-|     └── server.py                     # Entry file to launch the MCP service
+|     ├── server.py                     # MCP Tools
+|     └── mcp_demo.mp4                  # Demo of the interaction between MCP and LLM
 ├── pipeline/                           # [Extra] Advanced ETL & Hybrid Topic Modeling Scripts
 │     ├── ingest.py                     # Cleans and imports raw data into DuckDB
 |     ├── topic_modeling.py             # Extract topics and writes back to DB
@@ -72,7 +73,7 @@ Inspired by the "Science of Science" (an exploration of how science gets done), 
 
 ## 🌉 [Point 2/3] From Insights to MCP Tool Design
 
-**Notebook:** [`wildchat_analysis_mcp.ipynb`](https://github.com/minsilu/cs651-final/blob/main/insights/wildchat_data_analysis.ipynb)
+**Notebook:** [`wildchat_analysis_mcp.ipynb`](https://github.com/minsilu/cs651-final/blob/main/insights/wildchat_analysis_mcp.ipynb)
 
 This notebook acts as the **architectural bridge** between our data science insights and the final MCP Server implementation. Rather than deploying black-box code, we used this environment to **prototype, validate, and unit-test** every tool's logic against the live dataset.
 
@@ -113,7 +114,7 @@ To address unanticipated questions that pre-defined functions cannot cover (the 
 
 
 ## 🛠️ [Point 3] MCP Implementation 
-**Demo Video:** [🔗 Click Here to Watch the Demo](YOUR_VIDEO_LINK_HERE)  
+**Demo Video:** [🔗 Click Here to Watch the Demo](https://drive.google.com/file/d/1H-ZK5cKI4wOm16lWmVFGD0lgJGKq-Y1t/view?usp=sharing)  
 **Dataset on HuggingFace:** [🔗 WildChat-CS651](https://huggingface.co/datasets/luminlemon/wildchat-cs651/tree/main)
 
 While the previous section detailed the *design logic* and content of our tools, this section focuses on the **system architecture and engineering pipeline** required to make those tools performant. We utilize a **Local Server + Claude Desktop** architecture, where the MCP server runs locally on the user's machine (accessing the local DuckDB instance) and connects to Claude via `stdio`.
